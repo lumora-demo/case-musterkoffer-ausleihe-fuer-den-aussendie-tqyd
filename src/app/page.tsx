@@ -1,47 +1,66 @@
-import { ArrowRight, Plus } from "lucide-react";
+"use client";
+
+import { ArrowRight, Search } from "lucide-react";
 import Link from "next/link";
-import { Badge, Button, Card, Kennzahl, PageHeader, Section } from "@/components/ui";
+import { ButtonLink, Kennzahl, PageHeader, Section } from "@/components/ui";
 import { de } from "@/content/de";
-import { EINTRAEGE } from "@/lib/demo-daten";
+import { useAusleihe } from "@/lib/ausleihe";
+import { HEUTE, ICH, datum, kofferStatus, tageZwischen } from "@/lib/demo-daten";
+import { KofferListe } from "./koffer/teile";
 
 const t = de.uebersicht;
 
 export default function Uebersicht() {
-  const zahl = (s: string) => EINTRAEGE.filter((e) => e.status === s).length;
+  const { koffer, reservierungen, meldungen } = useAusleihe();
+  const zahl = (s: string) => koffer.filter((k) => kofferStatus(k) === s).length;
+  const offen = meldungen.filter((m) => !m.erledigt).length;
+
+  const meineIds = new Set([...koffer.filter((k) => k.ausgeliehenAn === ICH).map((k) => k.id), ...reservierungen.filter((r) => r.personId === ICH).map((r) => r.kofferId)]);
+  const meine = koffer.filter((k) => meineIds.has(k.id));
+  const ueberfaellig = koffer.filter((k) => kofferStatus(k) === "ueberfaellig");
+  const bald = koffer
+    .filter((k) => kofferStatus(k) === "unterwegs" && k.ausgeliehenAn !== ICH && k.rueckgabeBis && tageZwischen(HEUTE, k.rueckgabeBis) <= 7)
+    .sort((a, b) => (a.rueckgabeBis ?? "").localeCompare(b.rueckgabeBis ?? ""));
+  const hinweis = de.allgemein.stichtag(datum(HEUTE));
+
   return (
     <>
       <PageHeader title={t.title} lead={t.lead}>
-        <Button variante="primary" icon={Plus}>
-          {t.neu}
-        </Button>
+        <ButtonLink href="/koffer" variante="primary" icon={Search}>
+          {t.finden}
+        </ButtonLink>
       </PageHeader>
 
       <Section title={t.kennzahlen}>
-        <div className="grid grid-cols-2 gap-(--gap) md:grid-cols-3">
-          <Kennzahl label={t.offen} wert={zahl("offen")} hinweis={t.testdaten} />
-          <Kennzahl label={t.inArbeit} wert={zahl("arbeit")} hinweis={t.testdaten} />
-          <Kennzahl label={t.erledigt} wert={zahl("erledigt")} hinweis={t.testdaten} />
+        <div className="grid grid-cols-2 gap-(--gap) lg:grid-cols-4">
+          <Kennzahl label={t.imLager} wert={zahl("verfuegbar")} hinweis={hinweis} />
+          <Kennzahl label={t.unterwegs} wert={zahl("unterwegs")} hinweis={hinweis} />
+          <Kennzahl label={t.ueberfaellig} wert={zahl("ueberfaellig")} hinweis={hinweis} />
+          <Kennzahl label={t.meldungen} wert={offen} hinweis={hinweis} />
         </div>
       </Section>
 
-      <Section
-        title={t.zuletzt}
-        action={
-          <Link href="/eintraege" className="inline-flex min-h-11 items-center gap-1 text-small font-medium text-accent hover:underline">
-            {t.alle} <ArrowRight className="size-4" aria-hidden />
-          </Link>
-        }
-      >
-        <div className="grid gap-(--gap) sm:grid-cols-2">
-          {EINTRAEGE.slice(0, 2).map((e) => (
-            <Card key={e.id} klickbar className="flex flex-col gap-2">
-              <Badge ton={e.status === "erledigt" ? "ok" : e.status === "arbeit" ? "accent" : "neutral"}>{de.eintraege.status[e.status]}</Badge>
-              <p className="font-medium">{e.titel}</p>
-              <p className="line-clamp-2 text-small text-muted">{e.beschreibung}</p>
-            </Card>
-          ))}
-        </div>
+      <Section title={t.deine} action={<MehrLink href="/meine" />}>
+        {meine.length === 0 ? <p className="text-small text-muted">{t.deineLeer}</p> : <KofferListe koffer={meine} />}
       </Section>
+
+      <Section title={t.ueberfaelligTitel}>
+        {ueberfaellig.length === 0 ? <p className="text-small text-muted">{t.ueberfaelligLeer}</p> : <KofferListe koffer={ueberfaellig} />}
+      </Section>
+
+      {bald.length > 0 ? (
+        <Section title={t.baldZurueck} action={<MehrLink href="/koffer" />}>
+          <KofferListe koffer={bald} />
+        </Section>
+      ) : null}
     </>
+  );
+}
+
+function MehrLink({ href }: { href: string }) {
+  return (
+    <Link href={href} className="inline-flex min-h-11 items-center gap-1 text-small font-medium text-accent hover:underline">
+      {de.allgemein.alleAnzeigen} <ArrowRight className="size-4" aria-hidden />
+    </Link>
   );
 }

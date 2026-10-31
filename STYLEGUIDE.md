@@ -121,6 +121,8 @@ Fließtext höchstens 65–72 Zeichen breit. Überschriften mit `text-wrap: bala
 | `Hinweis` | Info, Warnung, Fehler im Inhalt: Titel sagt was, Text sagt, was zu tun ist |
 | `Field` + `Input` / `Textarea` / `Select` | Beschriftung **über** dem Feld, Hinweis darunter, Fehler ersetzt den Hinweis; nie nur Platzhalter |
 | `Segmented` | Umschalter für andere Darstellung oder kurze Auswahl, höchstens 5 Segmente |
+| `Dialog` | Formular (520 px) oder Rückfrage (420 px) über natives `<dialog>`: `Esc` schließt, Fokus bleibt drin, oben rechts immer ein X. Am Handy Fenster von unten über die volle Breite, Knöpfe untereinander |
+| `Toast` | Meldung unten nach einer Änderung: ein Satz, optional „Rückgängig“, verschwindet nach 6 s. Fläche `tile`, `rounded-pop`, `shadow-pop`; am Handy über der Leiste unten. In einem `aria-live`-Bereich ausgeben |
 
 Jeder Baustein hat die Zustände Ruhe, Hover, Fokus (Ring immer sichtbar), Gedrückt und Gesperrt. Gesperrt sparsam: lieber klickbar lassen und erklären, was fehlt.
 

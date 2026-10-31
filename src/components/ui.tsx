@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 // Bausteine mit Zustand liegen in eigenen Dateien ("use client") und werden hier mit ausgegeben.
 export { PageHeader } from "./page-header";
 export { Segmented } from "./segmented";
+export { Dialog } from "./dialog";
+export { Toast } from "./toast";
 
 // Knöpfe: genau ein „primary“ je Ansicht. Icon links vom Text.
 const KNOPF = {
@@ -143,7 +145,7 @@ export function Field({ label, hinweis, fehler, optional, children }: { label: s
   );
 }
 
-export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
+export function Input(props: React.ComponentProps<"input">) {
   return <input {...props} className={cn(feldKlasse, "h-(--ctl-h)", props.className)} />;
 }
 
