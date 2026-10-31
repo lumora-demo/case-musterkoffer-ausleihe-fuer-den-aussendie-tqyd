@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { AppShell } from "@/components/app-shell";
 import { de } from "@/content/de";
 import "./globals.css";
+import { Providers } from "./providers";
 
 // Schrift Geist, beim Bauen geladen und mit der App ausgeliefert.
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
@@ -21,7 +22,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="de" className={`${geist.variable} ${geistMono.variable} h-full antialiased`}>
       {/* data-app-shell: verhält sich wie eine App; ui-dense: dichte App-Größen (globals.css) */}
       <body data-app-shell className="ui-dense flex min-h-full flex-col font-sans">
-        <AppShell>{children}</AppShell>
+        <Providers>
+          <AppShell>{children}</AppShell>
+        </Providers>
       </body>
     </html>
   );
